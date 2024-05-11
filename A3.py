@@ -205,6 +205,41 @@ while opcion != final:
                 for empleado in datos_empleados:
                     print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
                 print(sep)
+        
+        elif opcion == 2:
+            print("""
+            Has elegido buscar un empleado, ¿por qué dato quieres efectuar la búsqueda?\n
+            1. Nombre
+            2. Primer apellido
+            3. Segundo apellido
+            """)
+
+            opcion = rango_opcion(3)
+            
+            if opcion == 1:
+                valor = input("Introduce el valor: ")
+                nombre_campo = "nom"
+            elif opcion == 2:
+                valor = input("Introduce el valor: ")
+                nombre_campo = "cognom1"
+            elif opcion == 3:
+                valor = input("Introduce el valor: ")
+                nombre_campo = "cognom2"
+
+            datos_empleado = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
+
+            # Comprobar si 'datos_empleados' tiene información y, si tiene, mostrar lo/s empleado/s coincidentes con el valor de la búsqueda.
+            print("\n" + sep)
+            if not datos_empleado:
+                print(f"NO existen empleados coincidentes con el valor introducido ({valor}).")
+                print(sep)
+            else:
+                contador = 0
+                for empleado in datos_empleado:
+                    print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
+                    contador+=1
+                print(f"\nSe han encontrado {contador} coincidencias.")
+                print(sep)
 
     elif opcion == 3:
         #######################################################
@@ -234,6 +269,37 @@ while opcion != final:
             else:
                 for proveedor in datos_proveedores:
                     print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
+                print(sep)
+        
+        elif opcion == 2:
+            print("""
+            Has elegido buscar un proveedor, ¿por qué dato quieres efectuar la búsqueda?\n
+            1. Nombre
+            2. CIF
+            """)
+
+            opcion = rango_opcion(2)
+            
+            if opcion == 1:
+                valor = input("Introduce el valor: ")
+                nombre_campo = "empresa"
+            elif opcion == 2:
+                valor = input("Introduce el valor: ")
+                nombre_campo = "cif"
+
+            datos_proveedor = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
+
+            # Comprobar si 'datos_proveedor' tiene información y, si tiene, mostrar lo/s proveedor/es coincidentes con el valor de la búsqueda.
+            print("\n" + sep)
+            if not datos_proveedor:
+                print(f"NO existen proveedores coincidentes con el valor introducido ({valor}).")
+                print(sep)
+            else:
+                contador = 0
+                for proveedor in datos_proveedor:
+                    print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
+                    contador+=1
+                print(f"\nSe han encontrado {contador} coincidencias.")
                 print(sep)
 
     elif opcion == 4:
