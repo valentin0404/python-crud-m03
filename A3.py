@@ -1,7 +1,7 @@
 #!/usr/bin/env python3
 # from A2P2DB import *
 import A3DB as db
-# import A2P2DML as dml
+import A3DML as dml
 import A3DQL as dql
 import datetime, os
 
@@ -128,6 +128,27 @@ def mostrar_proveedores():
             return datos_proveedores
 ### Fin de función mostrar_proveedores() ###################################################
 
+#######################################################################################
+# Definimos función para formatear cadenas y que cada palabra empiece por mayúscula
+# esto se implementa al añadir y modificar, así todo queda uniforme
+def formatear_cadena(cadena):
+    # Dividir la cadena en una lista de palabras
+    palabras = cadena.split()
+    
+    # Formatear cada palabra: primera letra mayúscula, resto minúsculas
+    palabras_formateadas = [palabra.capitalize() for palabra in palabras]
+    
+    # Unir las palabras formateadas de nuevo en una cadena
+    cadena_formateada = ' '.join(palabras_formateadas)
+    
+    return cadena_formateada
+### Fin de función formatear_cadena() ##################################################
+
+##############################################################################################
+############################ FIN DE DECLARACIÓN DE FUNCIONES #################################
+##############################################################################################
+
+
 while opcion != final:
     #######################################################
         # Menú inicial de opciones
@@ -218,6 +239,49 @@ while opcion != final:
                     
             except ValueError:
                 print("\nDebes introducir un número entero como ID de cliente.")
+        
+        elif opcion == 4:
+            opcion = None # Se le quita el valor únicamente en las opciones '4' para que cuando salgan de estas no finalice el programa.
+            print("\nHas elegido consultar añadir un nuevo cliente")
+            nuevo_cliente = []
+            nombre = input("Introduce el nombre del nuevo cliente: ")
+            apellidos = input("Introduce los apellidos del nuevo cliente: ")
+            
+            try:
+                telefono = int(input("Introduce el teléfono del nuevo cliente: "))
+            except ValueError:
+                print("\nDebes de introducir números únicamente")
+            if len(nombre) == 0 or len(apellidos) == 0 or len(str(telefono)) == 0:
+                print("\nNo has rellenado todos los campos, debes de rellenar todos.")
+            else:
+                nombre = formatear_cadena(nombre)
+                apellidos = formatear_cadena(apellidos)
+                if len(str(telefono)) == 9:
+                    # Separar los apellidos
+                    apellidos_separados = apellidos.split()
+                    apellido1 = apellidos_separados[0]  # Asignar la primera palabra al primer apellido
+                    
+                    if len(apellidos_separados) > 1:
+                        # Si hay más de una palabra en los apellidos, asignar el resto al segundo apellido
+                        apellido2 = ' '.join(apellidos_separados[1:])
+                    else:
+                        apellido2 = ''
+
+                    try:
+                        nuevo_cliente.append(apellido1)
+                        nuevo_cliente.append(apellido2)
+                        nuevo_cliente.append(telefono)
+                    except Exception as e:
+                        print("\nERROR: Ha ocurrido un error al añadir datos al cliente.")
+                        print(e)
+                    try:
+                        dml.añadir_generico(nombre_tabla, nombre, apellido1, apellido2, telefono)
+                        print(f"S\ne ha añadido el nuevo cliente {nombre}, {apellido1} {apellido2}.")
+                    except Exception as e:
+                        print(f"\nERROR: no se ha podido añadir al nuevo cliente ({nombre}, {apellido1} {apellido2}).")
+                        print(e)
+                else:
+                    print("\nEl teléfono no cumple el formato de 9 dígitos.")
 
     elif opcion == 2:
         #######################################################
