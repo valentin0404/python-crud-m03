@@ -85,6 +85,49 @@ def mostrar_clientes():
             return datos_clientes
 ### Fin de función mostrar_clientes() ###################################################
 
+#######################################################################################
+# Definimos función para mostrar todos los empleados y para no repetir código
+def mostrar_empleados():
+    try:
+        datos_empleados = dql.consultar_generico(nombre_tabla)
+    except Exception as e:
+        print("ERROR: no se han podido consultar los empleados.")
+        print(e)
+    else:
+        # Comprobar si existen empleados y, si existen, mostrarlos
+        print("\n" + sep)
+        if not datos_empleados:
+            print("NO existen empleados")
+            print(sep)
+        else:
+            print("Existen los siguientes empleados:\n")
+            for empleado in datos_empleados:
+                print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
+            print(sep)
+            return datos_empleados
+### Fin de función mostrar_empleados() ###################################################
+
+#######################################################################################
+# Definimos función para mostrar todos los proveedores y para no repetir código
+def mostrar_proveedores():
+    try:
+        datos_proveedores = dql.consultar_generico(nombre_tabla)
+    except Exception as e:
+        print("ERROR: no se han podido consultar los proveedores.")
+        print(e)
+    else:
+        # Comprobar si existen proveedores y, si existen, mostrarlos
+        print("\n" + sep)
+        if not datos_proveedores:
+            print("NO existen proveedores")
+            print(sep)
+        else:
+            for proveedor in datos_proveedores:
+                print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
+            print(sep)
+            return datos_proveedores
+### Fin de función mostrar_proveedores() ###################################################
+
 while opcion != final:
     #######################################################
         # Menú inicial de opciones
@@ -93,7 +136,7 @@ while opcion != final:
     1. Clientes
     2. Empleados
     3. Proveedores
-    4. Sortir""")
+    4. Salir""")
 
     opcion = rango_opcion(4)
 
@@ -162,10 +205,10 @@ while opcion != final:
                     encontrado = False  # Variable para indicar si se encuentra el cliente
                     id_cliente=id_cliente+10
                     for cliente in datos_clientes:
-                        if cliente[0] == id_cliente:
+                        if cliente[CEP_ID] == id_cliente:
                             encontrado = True
-                            print(f"{sep}\nHas elegido consultar a {cliente[1]} {cliente[2]} {cliente[3]}.")
-                            print(f"Su teléfono es {cliente[4]}.\n{sep}")
+                            print(f"{sep}\nHas elegido consultar a {cliente[CEP_NOM]} {cliente[CE_CGM1]} {cliente[CE_CGM2]}.")
+                            print(f"Su teléfono es {cliente[C_TLF]}.\n{sep}")
                             break  # Salir del bucle una vez encontrado el cliente
 
                     if not encontrado:
@@ -194,18 +237,7 @@ while opcion != final:
 
         if opcion == 1:
             print("\nConsultando todos los empleados existentes...")
-            datos_empleados = dql.consultar_generico(nombre_tabla)
-    
-            # Comprobar si existen empleados y, si existen, mostrarlos
-            print("\n" + sep)
-            if not datos_empleados:
-                print("NO existen empleados")
-                print(sep)
-            else:
-                for empleado in datos_empleados:
-                    print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
-                print(sep)
-        
+            mostrar_empleados()        
         elif opcion == 2:
             print("""
             Has elegido buscar un empleado, ¿por qué dato quieres efectuar la búsqueda?\n
@@ -241,6 +273,29 @@ while opcion != final:
                 print(f"\nSe han encontrado {contador} coincidencias.")
                 print(sep)
 
+        elif opcion == 3:
+            print("\nHas elegido consultar datos sobre un empleado")
+            datos_empleados = mostrar_empleados()
+            try:
+                id_empleado = int(input("\nQué empleado quieres elegir?: "))
+
+                if id_empleado >= 1 and id_empleado <= len(datos_empleados):
+                    encontrado = False  # Variable para indicar si se encuentra el empleado
+                    for empleado in datos_empleados:
+                        if empleado[CEP_ID] == id_empleado:
+                            encontrado = True
+                            print(f"{sep}\nHas elegido consultar a {empleado[CEP_NOM]} {empleado[CE_CGM1]} {empleado[CE_CGM2]}.")
+                            print(f"Su departamento es {empleado[E_DPT]}.\n{sep}")
+                            break  # Salir del bucle una vez encontrado el empleado
+
+                    if not encontrado:
+                        print("\nNo se encontró ningún empleado con el ID proporcionado.")
+                else:
+                    print("\nEl ID del empleado no es válido. Debe estar dentro del rango de la lista de empleados.")
+                    
+            except ValueError:
+                print("\nDebes introducir un número entero como ID de empleado.")
+
     elif opcion == 3:
         #######################################################
         # Menú de opciones dentro de proveedores
@@ -259,17 +314,7 @@ while opcion != final:
 
         if opcion == 1:
             print("\nConsultando todos los proveedores existentes...")
-            datos_proveedores = dql.consultar_generico(nombre_tabla)
-    
-            # Comprobar si existen proveedores y, si existen, mostrarlos
-            print("\n" + sep)
-            if not datos_proveedores:
-                print("NO existen proveedores")
-                print(sep)
-            else:
-                for proveedor in datos_proveedores:
-                    print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
-                print(sep)
+            mostrar_proveedores()
         
         elif opcion == 2:
             print("""
@@ -301,6 +346,31 @@ while opcion != final:
                     contador+=1
                 print(f"\nSe han encontrado {contador} coincidencias.")
                 print(sep)
+        
+        elif opcion == 3:
+            print("\nHas elegido consultar datos sobre un proveedor")
+            datos_proveedores = mostrar_proveedores()
+            try:
+                id_proveedor = int(input("\nQué proveedor quieres elegir?: "))
+
+                if id_proveedor >= 1 and id_proveedor <= len(datos_proveedores):
+                    encontrado = False  # Variable para indicar si se encuentra el proveedor
+                    for proveedor in datos_proveedores:
+                        if proveedor[CEP_ID] == id_proveedor:
+                            encontrado = True
+                            print(f"{sep}\nHas elegido consultar a {proveedor[CEP_NOM]}.")
+                            print(f"Su CIF es {proveedor[P_CIF]}.")
+                            print(f"Su dirección es {proveedor[P_ADR]}.")
+                            print(f"Su correo electrónico es {proveedor[P_MAIL]}.\n{sep}")
+                            break  # Salir del bucle una vez encontrado el proveedor
+
+                    if not encontrado:
+                        print("\nNo se encontró ningún proveedor con el ID proporcionado.")
+                else:
+                    print("\nEl ID del proveedor no es válido. Debe estar dentro del rango de la lista de proveedores.")
+                    
+            except ValueError:
+                print("\nDebes introducir un número entero como ID de proveedor.")
 
     elif opcion == 4:
         print("Cerrando conexión a la BD...")
