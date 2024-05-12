@@ -61,29 +61,9 @@ def validar_opcion():
         except KeyboardInterrupt:
             print("\nCtrl+C presionado. El proceso ha sido cancelado.")
             exit() 
-        except KeyboardInterrupt:
-            print("\nCtrl+C presionado. El proceso ha sido cancelado.")
-            exit() 
         except ValueError:
             print("\nNo has introducido una opción válida")
 ### Fin de función validar_opcion() ###################################################
-
-#######################################################################################
-# Definimos función para efectuar búsqueda y para no repetir código
-def subopcion2_generico(nombre_campo):
-    valor = ""
-    while True:
-        try:
-            valor = input("Introduce el valor: ")
-            if len(valor) == 0:
-                raise ValueError("\nEl valor no puede estar vacío.")
-            elif len(valor) > 40:
-                raise ValueError("\nEl valor no puede exceder los 40 caracteres.")
-            break
-        except ValueError as e:
-            print(e)
-    return valor
-### Fin de función subopcion2_generico() ###################################################
 
 #######################################################################################
 # Definimos función para efectuar búsqueda y para no repetir código
@@ -109,8 +89,6 @@ def mostrar_clientes():
     try:
         datos_clientes = dql.consultar_generico(nombre_tabla)
     except Exception as e:
-        print("ERROR: no se han podido consultar los clientes.")
-        print(e)
         print("ERROR: no se han podido consultar los clientes.")
         print(e)
     else:
@@ -246,56 +224,6 @@ while opcion != final:
 
                 datos_cliente = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
 
-                # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar lo/s cliente/s coincidentes con el valor de la búsqueda.
-                print("\n" + sep)
-                if not datos_cliente:
-                    print(f"NO existen clientes coincidentes con el valor introducido ({valor}).")
-                    print(sep)
-                else:
-                    contador = 0
-                    for cliente in datos_cliente:
-                        print(cliente[CEP_ID], "-", cliente[CEP_NOM], cliente[CE_CGM1], cliente[CE_CGM2])
-                        contador+=1
-                    print(f"\nSe han encontrado {contador} coincidencias.")
-                    print(sep)
-                
-            elif opcion == 3:
-                valor = input("Introduce el valor: ")
-                nombre_campo = "cognom2"
-
-            datos_cliente = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
-
-            # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar lo/s cliente/s coincidentes con el valor de la búsqueda.
-            print("\n" + sep)
-            if not datos_cliente:
-                print(f"NO existen clientes coincidentes con el valor introducido ({valor}).")
-                print(sep)
-            else:
-                contador = 0
-                for cliente in datos_cliente:
-                    print(cliente[CEP_ID], "-", cliente[CEP_NOM], cliente[CE_CGM1], cliente[CE_CGM2])
-                    contador+=1
-                print(f"\nSe han encontrado {contador} coincidencias.")
-                print(sep)
-            
-        elif opcion == 3:
-            print("\nHas elegido consultar datos sobre un cliente")
-            datos_clientes = mostrar_clientes()
-            try:
-                id_cliente = int(input("\nQué cliente quieres elegir?: "))
-                
-                if len(str(id_cliente)) == 0:
-                    raise ValueError("\nEl nombre no puede estar vacío.")
-                
-                if id_cliente >= 1 and id_cliente <= len(datos_clientes):
-                    encontrado = False  # Variable para indicar si se encuentra el cliente
-                    id_cliente=id_cliente+10
-                    for cliente in datos_clientes:
-                        if cliente[CEP_ID] == id_cliente:
-                            encontrado = True
-                            print(f"{sep}\nHas elegido consultar a {cliente[CEP_NOM]} {cliente[CE_CGM1]} {cliente[CE_CGM2]}.")
-                            print(f"Su teléfono es {cliente[C_TLF]}.\n{sep}")
-                            break  # Salir del bucle una vez encontrado el cliente
                 # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar lo/s cliente/s coincidentes con el valor de la búsqueda.
                 print("\n" + sep)
                 if not datos_cliente:
