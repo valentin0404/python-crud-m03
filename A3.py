@@ -58,9 +58,29 @@ def validar_opcion():
     while True:
         try:
             return int(input("\nEscoge la opción deseada: "))
+        except KeyboardInterrupt:
+            print("\nCtrl+C presionado. El proceso ha sido cancelado.")
+            exit() 
         except ValueError:
             print("\nNo has introducido una opción válida")
 ### Fin de función validar_opcion() ###################################################
+
+#######################################################################################
+# Definimos función para efectuar búsqueda y para no repetir código
+def subopcion2_generico(nombre_campo):
+    valor = ""
+    while True:
+        try:
+            valor = input("Introduce el valor: ")
+            if len(valor) == 0:
+                raise ValueError("\nEl valor no puede estar vacío.")
+            elif len(valor) > 40:
+                raise ValueError("\nEl valor no puede exceder los 40 caracteres.")
+            break
+        except ValueError as e:
+            print(e)
+    return valor
+### Fin de función subopcion2_generico() ###################################################
 
 #######################################################################################
 # Definimos función para mostrar todos los clientes y para no repetir código ya que se
@@ -69,8 +89,8 @@ def mostrar_clientes():
     try:
         datos_clientes = dql.consultar_generico(nombre_tabla)
     except Exception as e:
-            print("ERROR: no se han podido consultar los clientes.")
-            print(e)
+        print("ERROR: no se han podido consultar los clientes.")
+        print(e)
     else:
         # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar los clientes
         print("\n" + sep)
@@ -192,14 +212,14 @@ while opcion != final:
             opcion = rango_opcion(3)
             
             if opcion == 1:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "nom"
+                valor = subopcion2_generico(nombre_campo)
             elif opcion == 2:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "cognom1"
+                valor = subopcion2_generico(nombre_campo)
             elif opcion == 3:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "cognom2"
+                valor = subopcion2_generico(nombre_campo)
 
             datos_cliente = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
 
@@ -221,7 +241,10 @@ while opcion != final:
             datos_clientes = mostrar_clientes()
             try:
                 id_cliente = int(input("\nQué cliente quieres elegir?: "))
-
+                
+                if len(str(id_cliente)) == 0:
+                    raise ValueError("\nEl nombre no puede estar vacío.")
+                
                 if id_cliente >= 1 and id_cliente <= len(datos_clientes):
                     encontrado = False  # Variable para indicar si se encuentra el cliente
                     id_cliente=id_cliente+10
@@ -236,52 +259,89 @@ while opcion != final:
                         print("\nNo se encontró ningún cliente con el ID proporcionado.")
                 else:
                     print("\nEl ID del cliente no es válido. Debe estar dentro del rango de la lista de clientes.")
-                    
+            
+            except KeyboardInterrupt:
+                print("\nCtrl+C presionado. Saliendo de la opción...")
+                          
             except ValueError:
                 print("\nDebes introducir un número entero como ID de cliente.")
         
         elif opcion == 4:
-            opcion = None # Se le quita el valor únicamente en las opciones '4' para que cuando salgan de estas no finalice el programa.
+            opcion = None
             print("\nHas elegido consultar añadir un nuevo cliente")
-            nuevo_cliente = []
-            nombre = input("Introduce el nombre del nuevo cliente: ")
-            apellidos = input("Introduce los apellidos del nuevo cliente: ")
+            nuevo_cliente = {} # IMPORTANTE: Si se ejecuta el programa con una versión anterior a Python 3.7 habrán procedimientos dentro de funciones que no funcionarán correctamente, ya que el orden no se garantiza en versiones posteriores. Este programa ha sido probado con la versión 3.11.0rc1, lo que garantiza en correcto funcionamiento.
+            
+            # Validación de nombre
+            nombre = ""
+            while True:
+                try:
+                    nombre = input("\nIntroduce el nombre del nuevo cliente (máximo 40 caracteres): ")
+                    if len(nombre) == 0:
+                        raise ValueError("\nEl nombre no puede estar vacío.")
+                    elif len(nombre) > 40:
+                        raise ValueError("\nEl nombre no puede exceder los 40 caracteres.")
+                    break
+                except KeyboardInterrupt:
+                    print("\nCtrl+C presionado. El proceso ha sido cancelado.")
+                    exit()
+                except ValueError as e:
+                    print(e)
+            
+            # Validación de apellidos
+            apellidos = ""
+            while True:
+                try:
+                    apellidos = input("\nIntroduce los apellidos del nuevo cliente (máximo 40 caracteres): ")
+                    if len(apellidos) == 0:
+                        raise ValueError("\nLos apellidos no pueden estar vacíos.")
+                    elif len(apellidos) > 60:
+                        raise ValueError("\nLos apellidos no pueden exceder los 40 caracteres.")
+                    break
+                except KeyboardInterrupt:
+                    print("\nCtrl+C presionado. El proceso ha sido cancelado.")
+                    exit()
+                except ValueError as e:
+                    print(e)
+            
+            # Validación de teléfono
+            while True:
+                try:
+                    telefono = input("\nIntroduce el teléfono del nuevo cliente (9 dígitos): ")
+                    if len(telefono) == 0:
+                        raise ValueError("\nLos apellidos no pueden estar vacíos.")
+                    if not telefono.isdigit():
+                        raise ValueError("\nEl teléfono debe contener únicamente dígitos.")
+                    if len(telefono) != 9:
+                        raise ValueError("\nEl teléfono debe contener 9 dígitos.")
+                    break
+                except KeyboardInterrupt:
+                    print("\nCtrl+C presionado. El proceso ha sido cancelado.")
+                    exit()
+                except ValueError as e:
+                    print(e)
+            
+            nombre = formatear_cadena(nombre)
+            apellidos = formatear_cadena(apellidos)
+            
+            apellidos_separados = apellidos.split()
+            apellido1 = apellidos_separados[0]  # Asignar la primera palabra al primer apellido
+            
+            if len(apellidos_separados) > 1:
+                apellido2 = ' '.join(apellidos_separados[1:])  # Si hay más de una palabra en los apellidos, asignar el resto al segundo apellido
+            else:
+                apellido2 = ''
+
+            nuevo_cliente["nom"] = nombre
+            nuevo_cliente["cognom1"] = apellido1
+            nuevo_cliente["cognom2"] = apellido2
+            nuevo_cliente["telefon"] = telefono
             
             try:
-                telefono = int(input("Introduce el teléfono del nuevo cliente: "))
-            except ValueError:
-                print("\nDebes de introducir números únicamente")
-            if len(nombre) == 0 or len(apellidos) == 0 or len(str(telefono)) == 0:
-                print("\nNo has rellenado todos los campos, debes de rellenar todos.")
-            else:
-                nombre = formatear_cadena(nombre)
-                apellidos = formatear_cadena(apellidos)
-                if len(str(telefono)) == 9:
-                    # Separar los apellidos
-                    apellidos_separados = apellidos.split()
-                    apellido1 = apellidos_separados[0]  # Asignar la primera palabra al primer apellido
-                    
-                    if len(apellidos_separados) > 1:
-                        # Si hay más de una palabra en los apellidos, asignar el resto al segundo apellido
-                        apellido2 = ' '.join(apellidos_separados[1:])
-                    else:
-                        apellido2 = ''
-
-                    try:
-                        nuevo_cliente.append(apellido1)
-                        nuevo_cliente.append(apellido2)
-                        nuevo_cliente.append(telefono)
-                    except Exception as e:
-                        print("\nERROR: Ha ocurrido un error al añadir datos al cliente.")
-                        print(e)
-                    try:
-                        dml.añadir_generico(nombre_tabla, nombre, apellido1, apellido2, telefono)
-                        print(f"S\ne ha añadido el nuevo cliente {nombre}, {apellido1} {apellido2}.")
-                    except Exception as e:
-                        print(f"\nERROR: no se ha podido añadir al nuevo cliente ({nombre}, {apellido1} {apellido2}).")
-                        print(e)
-                else:
-                    print("\nEl teléfono no cumple el formato de 9 dígitos.")
+                dml.añadir_generico(nombre_tabla, nuevo_cliente)
+                print(f"\nSe ha añadido el nuevo cliente {nombre}, {apellido1} {apellido2}.")
+            except Exception as e:
+                print(f"\nERROR: no se ha podido añadir al nuevo cliente ({nombre}, {apellido1} {apellido2}).")
+                print(e)
 
     elif opcion == 2:
         #######################################################
@@ -313,14 +373,14 @@ while opcion != final:
             opcion = rango_opcion(3)
             
             if opcion == 1:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "nom"
+                valor = subopcion2_generico(nombre_campo)
             elif opcion == 2:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "cognom1"
+                valor = subopcion2_generico(nombre_campo)
             elif opcion == 3:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "cognom2"
+                valor = subopcion2_generico(nombre_campo)
 
             datos_empleado = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
 
@@ -359,6 +419,8 @@ while opcion != final:
                     
             except ValueError:
                 print("\nDebes introducir un número entero como ID de empleado.")
+            except KeyboardInterrupt:
+                print("\nCtrl+C presionado. Saliendo de la opción...")
 
     elif opcion == 3:
         #######################################################
@@ -390,11 +452,11 @@ while opcion != final:
             opcion = rango_opcion(2)
             
             if opcion == 1:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "empresa"
+                valor = subopcion2_generico(nombre_campo)
             elif opcion == 2:
-                valor = input("Introduce el valor: ")
                 nombre_campo = "cif"
+                valor = subopcion2_generico(nombre_campo)
 
             datos_proveedor = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
 
@@ -435,7 +497,9 @@ while opcion != final:
                     
             except ValueError:
                 print("\nDebes introducir un número entero como ID de proveedor.")
-
+            except KeyboardInterrupt:
+                    print("\nCtrl+C presionado. Saliendo de la opción...")
+                    
     elif opcion == 4:
         print("Cerrando conexión a la BD...")
         db.desconnectar()
