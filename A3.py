@@ -83,70 +83,43 @@ def subopcion2_generico(nombre_campo):
 ### Fin de función subopcion2_generico() ###################################################
 
 #######################################################################################
-# Definimos función para mostrar todos los clientes y para no repetir código ya que se
+# Definimos función para mostrar todos los clientes/empleados/proveedores y para no repetir código ya que se
 # repite en las subopciones 1 y 2 de ambas opciones generales.
-def mostrar_clientes():
-    try:
-        datos_clientes = dql.consultar_generico(nombre_tabla)
-    except Exception as e:
-        print("ERROR: no se han podido consultar los clientes.")
-        print(e)
-    else:
-        # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar los clientes
-        print("\n" + sep)
-        if not datos_clientes:
-            print("NO existen clientes")
-            print(sep)
-        else:
-            print("Existen los siguientes clientes:\n")
-            for cliente in datos_clientes:
-                print(cliente[CEP_ID]-10, "-", cliente[CEP_NOM], cliente[CE_CGM1], cliente[CE_CGM2])
-            print(sep)
-            return datos_clientes
-### Fin de función mostrar_clientes() ###################################################
+def mostrar_generico():
+    if nombre_tabla == "cliente":
+        texto="clientes"
+    elif nombre_tabla == "empleat":
+        texto="empleados"
+    elif nombre_tabla == "proveidor":
+        texto="proveedores"
 
-#######################################################################################
-# Definimos función para mostrar todos los empleados y para no repetir código
-def mostrar_empleados():
     try:
-        datos_empleados = dql.consultar_generico(nombre_tabla)
+        datos_tabla = dql.consultar_generico(nombre_tabla)
     except Exception as e:
-        print("ERROR: no se han podido consultar los empleados.")
+        print(f"ERROR: no se han podido consultar los {texto}.")
         print(e)
     else:
-        # Comprobar si existen empleados y, si existen, mostrarlos
+        # Comprobar si 'datos_tabla' tiene información y, si tiene, mostrar los datos
         print("\n" + sep)
-        if not datos_empleados:
-            print("NO existen empleados")
+        if not datos_tabla:
+            print(f"NO existen {texto}")
             print(sep)
         else:
-            print("Existen los siguientes empleados:\n")
-            for empleado in datos_empleados:
-                print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
+            print(f"Existen los siguientes {texto}:\n")
+            if nombre_tabla == "cliente":
+                for dato in datos_tabla:
+                    print(dato[CEP_ID]-10, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+            elif nombre_tabla == "empleat":
+                for dato in datos_tabla:
+                    print(dato[CEP_ID], "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+            elif nombre_tabla == "proveidor":
+                for dato in datos_tabla:
+                    print(dato[CEP_ID], "-", dato[CEP_NOM])
+            
             print(sep)
-            return datos_empleados
-### Fin de función mostrar_empleados() ###################################################
-
-#######################################################################################
-# Definimos función para mostrar todos los proveedores y para no repetir código
-def mostrar_proveedores():
-    try:
-        datos_proveedores = dql.consultar_generico(nombre_tabla)
-    except Exception as e:
-        print("ERROR: no se han podido consultar los proveedores.")
-        print(e)
-    else:
-        # Comprobar si existen proveedores y, si existen, mostrarlos
-        print("\n" + sep)
-        if not datos_proveedores:
-            print("NO existen proveedores")
-            print(sep)
-        else:
-            for proveedor in datos_proveedores:
-                print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
-            print(sep)
-            return datos_proveedores
-### Fin de función mostrar_proveedores() ###################################################
+            if opcion != 1: # En la opción 1 no nos interesa devolver un return
+                return datos_tabla
+### Fin de función mostrar_generico() ###################################################
 
 #######################################################################################
 # Definimos función para formatear cadenas y que cada palabra empiece por mayúscula
@@ -200,7 +173,7 @@ while opcion != final:
 
             if opcion == 1:
                 print("\nConsultando todos los clientes existentes...")
-                mostrar_clientes() # Función para mostrar todos los clientes.
+                mostrar_generico() # Función para mostrar todos los clientes.
             
             elif opcion == 2:
                 print("""
@@ -239,7 +212,7 @@ while opcion != final:
                 
             elif opcion == 3:
                 print("\nHas elegido consultar datos sobre un cliente")
-                datos_clientes = mostrar_clientes()
+                datos_clientes = mostrar_generico()
                 try:
                     id_cliente = int(input("\nQué cliente quieres elegir?: "))
                     
@@ -374,7 +347,7 @@ while opcion != final:
 
             if opcion == 1:
                 print("\nConsultando todos los empleados existentes...")
-                mostrar_empleados()        
+                mostrar_generico()        
             elif opcion == 2:
                 print("""
                 Has elegido buscar un empleado, ¿por qué dato quieres efectuar la búsqueda?\n
@@ -412,7 +385,7 @@ while opcion != final:
 
             elif opcion == 3:
                 print("\nHas elegido consultar datos sobre un empleado")
-                datos_empleados = mostrar_empleados()
+                datos_empleados = mostrar_generico()
                 try:
                     id_empleado = int(input("\nQué empleado quieres elegir?: "))
 
@@ -541,7 +514,7 @@ while opcion != final:
 
             if opcion == 1:
                 print("\nConsultando todos los proveedores existentes...")
-                mostrar_proveedores()
+                mostrar_generico()
             
             elif opcion == 2:
                 print("""
@@ -576,7 +549,7 @@ while opcion != final:
             
             elif opcion == 3:
                 print("\nHas elegido consultar datos sobre un proveedor")
-                datos_proveedores = mostrar_proveedores()
+                datos_proveedores = mostrar_generico()
                 try:
                     id_proveedor = int(input("\nQué proveedor quieres elegir?: "))
 
