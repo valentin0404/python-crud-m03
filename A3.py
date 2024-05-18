@@ -278,11 +278,21 @@ def añadir_datos():
 # Definimos función para formatear cadenas y que cada palabra empiece por mayúscula
 # esto se implementa al añadir y modificar, así todo queda uniforme
 def formatear_cadena(cadena):
+    # Lista de abreviaturas a mantener en mayúsculas
+    abreviaturas = {"s.a.", "s.e.", "s.l.", "s.r.l.", "s.r.c.", "s.c."}
+    
     # Dividir la cadena en una lista de palabras
     palabras = cadena.split()
     
-    # Formatear cada palabra: primera letra mayúscula, resto minúsculas
-    palabras_formateadas = [palabra.capitalize() for palabra in palabras]
+    # Formatear cada palabra
+    palabras_formateadas = []
+    for palabra in palabras:
+        if palabra.lower() in abreviaturas:
+            # Convertir la palabra a mayúsculas si es una abreviatura conocida
+            palabras_formateadas.append(palabra.upper())
+        else:
+            # Capitalizar la palabra normalmente
+            palabras_formateadas.append(palabra.capitalize())
     
     # Unir las palabras formateadas de nuevo en una cadena
     cadena_formateada = ' '.join(palabras_formateadas)
