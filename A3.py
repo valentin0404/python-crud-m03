@@ -243,6 +243,37 @@ def consultar_datos():
         print(f"\nDebes introducir un número entero como ID de {texto}.")
 ### Fin de función consultar_datos() ###################################################
 
+def añadir_datos():
+    if nombre_tabla == "cliente":
+        texto = "cliente"
+    elif nombre_tabla == "empleat":
+        texto = "empleado"
+    elif nombre_tabla == "proveidor":
+        texto = "proveedor"
+    try:
+        existe = dql.comprobar_generico(nombre_tabla, nuevo_registro)
+        if not existe:
+            try:
+                dml.añadir_generico(nombre_tabla, nuevo_registro)
+                if nombre_tabla != "proveidor":
+                    print(f"\nSe ha añadido el nuevo {texto} {nombre}, {apellido1} {apellido2}.")
+                else:
+                    print(f"\nSe ha añadido el nuevo {texto} {nombre}.")
+            except Exception as e:
+                if nombre_tabla != "proveidor":
+                    print(f"\nERROR: no se ha podido añadir al nuevo {texto} ({nombre}, {apellido1} {apellido2}).")
+                else:
+                    print(f"\nERROR: no se ha podido añadir al nuevo {texto} ({nombre}).")
+                print(e)
+        else:
+            print(f"\nATENCIÓN: El {texto} que intentas introducir ya existe en la BD.")
+    except Exception as e:
+        if nombre_tabla != "proveidor":
+            print(f"\nERROR: no se ha podido comprobar si existen los datos en la BD del nuevo {texto} ({nombre}, {apellido1} {apellido2}).")
+        else:
+            print(f"\nERROR: no se ha podido comprobar si existen los datos en la BD del nuevo {texto} ({nombre}).")
+        print(e)
+
 #######################################################################################
 # Definimos función para formatear cadenas y que cada palabra empiece por mayúscula
 # esto se implementa al añadir y modificar, así todo queda uniforme
@@ -306,7 +337,7 @@ while opcion != final:
             elif opcion == 4:
                 opcion = None
                 print("\nHas elegido añadir un nuevo cliente")
-                nuevo_cliente = {} # IMPORTANTE: Si se ejecuta el programa con una versión anterior a Python 3.7 habrán procedimientos dentro de funciones que no funcionarán correctamente, ya que el orden no se garantiza en versiones posteriores. Este programa ha sido probado con la versión 3.11.0rc1, lo que garantiza en correcto funcionamiento.
+                nuevo_registro = {} # IMPORTANTE: Si se ejecuta el programa con una versión anterior a Python 3.7 habrán procedimientos dentro de funciones que no funcionarán correctamente, ya que el orden no se garantiza en versiones posteriores. Este programa ha sido probado con la versión 3.11.0rc1, lo que garantiza en correcto funcionamiento.
                 
                 # Validación de nombre
                 nombre = ""
@@ -369,25 +400,13 @@ while opcion != final:
                 else:
                     apellido2 = ''
 
-                nuevo_cliente["nom"] = nombre
-                nuevo_cliente["cognom1"] = apellido1
-                nuevo_cliente["cognom2"] = apellido2
-                nuevo_cliente["telefon"] = telefono
+                nuevo_registro["nom"] = nombre
+                nuevo_registro["cognom1"] = apellido1
+                nuevo_registro["cognom2"] = apellido2
+                nuevo_registro["telefon"] = telefono
                 
-                try:
-                    existe = dql.comprobar_generico(nombre_tabla, nuevo_cliente)
-                    if not existe:
-                        try:
-                            dml.añadir_generico(nombre_tabla, nuevo_cliente)
-                            print(f"\nSe ha añadido el nuevo cliente {nombre}, {apellido1} {apellido2}.")
-                        except Exception as e:
-                            print(f"\nERROR: no se ha podido añadir al nuevo cliente ({nombre}, {apellido1} {apellido2}).")
-                            print(e)
-                    else:
-                        print("\nATENCIÓN: El cliente que intentas introducir ya existe en la BD.")
-                except Exception as e:
-                    print(f"\nERROR: no se ha podido comprobar si existen los datos en la BD del nuevo cliente ({nombre}).")
-                    print(e)
+                añadir_datos() # Función para añadir el nuevo cliente.
+
             elif opcion == 7:
                 break  # Salir del bucle interno y volver al menú inicial
 
@@ -420,7 +439,7 @@ while opcion != final:
             elif opcion == 4:
                 opcion = None
                 print("\nHas elegido añadir un nuevo empleado")
-                nuevo_empleado = {}
+                nuevo_registro = {}
                 
                 # Validación de nombre
                 nombre = ""
@@ -482,25 +501,13 @@ while opcion != final:
                 else:
                     apellido2 = ''
 
-                nuevo_empleado["nom"] = nombre
-                nuevo_empleado["cognom1"] = apellido1
-                nuevo_empleado["cognom2"] = apellido2
-                nuevo_empleado["departament"] = departamento
+                nuevo_registro["nom"] = nombre
+                nuevo_registro["cognom1"] = apellido1
+                nuevo_registro["cognom2"] = apellido2
+                nuevo_registro["departament"] = departamento
                 
-                try:
-                    existe = dql.comprobar_generico(nombre_tabla, nuevo_empleado)
-                    if not existe:
-                        try:
-                            dml.añadir_generico(nombre_tabla, nuevo_empleado)
-                            print(f"\nSe ha añadido el nuevo empleado {nombre}, {apellido1} {apellido2}.")
-                        except Exception as e:
-                            print(f"\nERROR: no se ha podido añadir al nuevo empleado ({nombre}, {apellido1} {apellido2}).")
-                            print(e)
-                    else:
-                        print("\nATENCIÓN: El empleado que intentas introducir ya existe en la BD.")
-                except Exception as e:
-                    print(f"\nERROR: no se ha podido comprobar si existen los datos en la BD del nuevo empleado ({nombre}).")
-                    print(e)
+                añadir_datos() # Función para añadir el nuevo empleado.
+
             elif opcion == 7:
                 break
 
@@ -534,7 +541,7 @@ while opcion != final:
             elif opcion == 4:
                 opcion = None
                 print("\nHas elegido añadir un nuevo proveedor")
-                nuevo_proveedor = {}
+                nuevo_registro = {}
                 
                 # Validación de nombre
                 nombre = ""
@@ -609,25 +616,13 @@ while opcion != final:
                 nombre = formatear_cadena(nombre)
 
                 
-                nuevo_proveedor["empresa"] = nombre
-                nuevo_proveedor["cif"] = cif
-                nuevo_proveedor["adreca"] = direccion
-                nuevo_proveedor["mail"] = correo
+                nuevo_registro["empresa"] = nombre
+                nuevo_registro["cif"] = cif
+                nuevo_registro["adreca"] = direccion
+                nuevo_registro["mail"] = correo
                 
-                try:
-                    existe = dql.comprobar_generico(nombre_tabla, nuevo_proveedor)
-                    if not existe:
-                        try:
-                            dml.añadir_generico(nombre_tabla, nuevo_proveedor)
-                            print(f"\nSe ha añadido el nuevo proveedor {nombre}.")
-                        except Exception as e:
-                            print(f"\nERROR: no se ha podido añadir al nuevo proveedor ({nombre}.")
-                            print(e)
-                    else:
-                        print("\nATENCIÓN: El proveedor que intentas introducir ya existe en la BD.")
-                except Exception as e:
-                    print(f"\nERROR: no se ha podido comprobar si existen los datos en la BD del nuevo proveedor ({nombre}).")
-                    print(e)
+                añadir_datos() # Función para añadir el nuevo proveedor.
+
             elif opcion == 7:
                 break 
                     
