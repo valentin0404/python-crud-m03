@@ -60,7 +60,8 @@ def validar_opcion():
             return int(input("\nEscoge la opción deseada: "))
         except KeyboardInterrupt:
             print("\nCtrl+C presionado. El proceso ha sido cancelado.")
-            exit() 
+            db.desconnectar() # Como en este except de teclado se va a salir del programa, se desconecta de la BD préviamente.
+            exit()
         except ValueError:
             print("\nNo has introducido una opción válida")
 ### Fin de función validar_opcion() ###################################################
@@ -108,15 +109,11 @@ def mostrar_generico():
             print(f"Existen los siguientes {texto}:\n")
             id_mapeo = {}  # Diccionario para almacenar el mapping enumerate ID -> real ID
 
-            if nombre_tabla == "cliente":
+            if nombre_tabla != "proveidor":
                 for index, dato in enumerate(datos_tabla, start=1):
                     print(index, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
                     id_mapeo[index] = dato[CEP_ID]
-            elif nombre_tabla == "empleat":
-                for index, dato in enumerate(datos_tabla, start=1):
-                    print(index, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
-                    id_mapeo[index] = dato[CEP_ID]
-            elif nombre_tabla == "proveidor":
+            else:
                 for index, dato in enumerate(datos_tabla, start=1):
                     print(index, "-", dato[CEP_NOM])
                     id_mapeo[index] = dato[CEP_ID]
@@ -126,6 +123,75 @@ def mostrar_generico():
                 return datos_tabla, id_mapeo
 
 ### Fin de función mostrar_generico() ###################################################
+
+# Definimos función para buscar coincidencias del valor introducido en todos los 
+# clientes/empleados/proveedores y para no repetir código ya que se repite en las 
+# subopciones 2 de las 3 opciones generales.
+def buscar_dato():
+    if nombre_tabla == "cliente":
+        texto = "cliente"
+    elif nombre_tabla == "empleat":
+        texto = "empleado"
+    elif nombre_tabla == "proveidor":
+        texto = "proveedor"
+
+    print(f"Has elegido buscar un {texto}, ¿por qué dato quieres efectuar la búsqueda?\n")
+
+    if nombre_tabla != "proveidor":
+        print(f"""
+        1. Nombre
+        2. Primer apellido
+        3. Segundo apellido
+        """)
+
+        opcion = rango_opcion(3)
+
+        if opcion == 1:
+            nombre_campo = "nom"
+            valor = subopcion2_generico(nombre_campo)
+        elif opcion == 2:
+            nombre_campo = "cognom1"
+            valor = subopcion2_generico(nombre_campo)
+        elif opcion == 3:
+            nombre_campo = "cognom2"
+            valor = subopcion2_generico(nombre_campo)
+    else:
+        print("""
+        1. Nombre
+        2. CIF
+        """)
+
+        opcion = rango_opcion(2)
+
+        if opcion == 1:
+            nombre_campo = "empresa"
+            valor = subopcion2_generico(nombre_campo)
+        elif opcion == 2:
+            nombre_campo = "cif"
+            valor = subopcion2_generico(nombre_campo)
+
+    try:
+        datos_tabla = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
+    except Exception as e:
+        print(f"ERROR: no se han podido consultar los {texto}s.")
+        print(e)
+    else:
+        # Comprobar si 'datos_tabla' tiene información y, si tiene, mostrar lo/s cliente/s | empleado/s | proveedor/es coincidentes con el valor de la búsqueda.
+        print("\n" + sep)
+        if not datos_tabla:
+            print(f"NO existen {texto}s coincidentes con el valor introducido ({valor}).")
+            print(sep)
+        else:
+            contador = 0
+            for index, dato in enumerate(datos_tabla, start=1):
+                if nombre_tabla != "proveidor":
+                    print(index, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+                else:
+                    print(index, "-", dato[CEP_NOM])
+                contador+=1
+            print(f"\nSe han encontrado {contador} coincidencias.")
+            print(sep)
+### Fin de función buscar_dato() ###################################################
 
 #######################################################################################
 # Definimos función para consultar el cliente/empleado/proveedor a la elección de lo introducido por el usuario
@@ -149,7 +215,7 @@ def consultar_datos():
             for dato in datos_tabla:
                 if dato[CEP_ID] == id_dato:
                     encontrado = True
-                    if nombre_tabla != "proveedor": # Condicionales para mostrar dependiendo de que tabla se consulta unos datos u otros.
+                    if nombre_tabla != "proveidor": # Condicionales para mostrar dependiendo de que tabla se consulta unos datos u otros.
                         print(f"{sep}\nHas elegido consultar a {dato[CEP_NOM]} {dato[CE_CGM1]} {dato[CE_CGM2]}.")
                         if nombre_tabla == "empleat":
                             print(f"Su teléfono es {dato[C_TLF]}.\n{sep}")
@@ -165,7 +231,7 @@ def consultar_datos():
             if not encontrado:
                 print(f"\nNo se encontró ningún {texto} con el ID proporcionado.")
         else:
-            if nombre_tabla != "proveedor":
+            if nombre_tabla != "proveidor":
                 print(f"\nEl ID del {texto} no es válido. Debe estar dentro del rango de la lista de {texto}s.")
             else:
                 print(f"\nEl ID del {texto} no es válido. Debe estar dentro del rango de la lista de {texto}es.")
@@ -232,42 +298,10 @@ while opcion != final:
                 mostrar_generico() # Función para mostrar todos los clientes.
             
             elif opcion == 2:
-                print("""
-                Has elegido buscar un cliente, ¿por qué dato quieres efectuar la búsqueda?\n
-                1. Nombre
-                2. Primer apellido
-                3. Segundo apellido
-                """)
-
-                opcion = rango_opcion(3)
-                
-                if opcion == 1:
-                    nombre_campo = "nom"
-                    valor = subopcion2_generico(nombre_campo)
-                elif opcion == 2:
-                    nombre_campo = "cognom1"
-                    valor = subopcion2_generico(nombre_campo)
-                elif opcion == 3:
-                    nombre_campo = "cognom2"
-                    valor = subopcion2_generico(nombre_campo)
-
-                datos_cliente = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
-
-                # Comprobar si 'datos_clientes' tiene información y, si tiene, mostrar lo/s cliente/s coincidentes con el valor de la búsqueda.
-                print("\n" + sep)
-                if not datos_cliente:
-                    print(f"NO existen clientes coincidentes con el valor introducido ({valor}).")
-                    print(sep)
-                else:
-                    contador = 0
-                    for cliente in datos_cliente:
-                        print(cliente[CEP_ID], "-", cliente[CEP_NOM], cliente[CE_CGM1], cliente[CE_CGM2])
-                        contador+=1
-                    print(f"\nSe han encontrado {contador} coincidencias.")
-                    print(sep)
+                buscar_dato() # Función para buscar coincidencias del valor en los clientes.
                 
             elif opcion == 3:
-                consultar_datos()
+                consultar_datos() # Función para consultar los datos del cliente seleccionado
                             
             elif opcion == 4:
                 opcion = None
@@ -376,44 +410,12 @@ while opcion != final:
 
             if opcion == 1:
                 print("\nConsultando todos los empleados existentes...")
-                mostrar_generico()        
+                mostrar_generico() # Función para mostrar todos los empleados 
             elif opcion == 2:
-                print("""
-                Has elegido buscar un empleado, ¿por qué dato quieres efectuar la búsqueda?\n
-                1. Nombre
-                2. Primer apellido
-                3. Segundo apellido
-                """)
-
-                opcion = rango_opcion(3)
-                
-                if opcion == 1:
-                    nombre_campo = "nom"
-                    valor = subopcion2_generico(nombre_campo)
-                elif opcion == 2:
-                    nombre_campo = "cognom1"
-                    valor = subopcion2_generico(nombre_campo)
-                elif opcion == 3:
-                    nombre_campo = "cognom2"
-                    valor = subopcion2_generico(nombre_campo)
-
-                datos_empleado = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
-
-                # Comprobar si 'datos_empleados' tiene información y, si tiene, mostrar lo/s empleado/s coincidentes con el valor de la búsqueda.
-                print("\n" + sep)
-                if not datos_empleado:
-                    print(f"NO existen empleados coincidentes con el valor introducido ({valor}).")
-                    print(sep)
-                else:
-                    contador = 0
-                    for empleado in datos_empleado:
-                        print(empleado[CEP_ID], "-", empleado[CEP_NOM], empleado[CE_CGM1], empleado[CE_CGM2])
-                        contador+=1
-                    print(f"\nSe han encontrado {contador} coincidencias.")
-                    print(sep)
+                buscar_dato() # Función para buscar coincidencias del valor en los empleados
 
             elif opcion == 3:
-                consultar_datos()
+                consultar_datos() # Función para consultar los datos del empleado seleccionado
             
             elif opcion == 4:
                 opcion = None
@@ -521,41 +523,13 @@ while opcion != final:
 
             if opcion == 1:
                 print("\nConsultando todos los proveedores existentes...")
-                mostrar_generico()
+                mostrar_generico() # Función para mostrar todos los proveedores
             
             elif opcion == 2:
-                print("""
-                Has elegido buscar un proveedor, ¿por qué dato quieres efectuar la búsqueda?\n
-                1. Nombre
-                2. CIF
-                """)
-
-                opcion = rango_opcion(2)
-                
-                if opcion == 1:
-                    nombre_campo = "empresa"
-                    valor = subopcion2_generico(nombre_campo)
-                elif opcion == 2:
-                    nombre_campo = "cif"
-                    valor = subopcion2_generico(nombre_campo)
-
-                datos_proveedor = dql.buscar_generico(nombre_tabla, nombre_campo, valor)
-
-                # Comprobar si 'datos_proveedor' tiene información y, si tiene, mostrar lo/s proveedor/es coincidentes con el valor de la búsqueda.
-                print("\n" + sep)
-                if not datos_proveedor:
-                    print(f"NO existen proveedores coincidentes con el valor introducido ({valor}).")
-                    print(sep)
-                else:
-                    contador = 0
-                    for proveedor in datos_proveedor:
-                        print(proveedor[CEP_ID], "-", proveedor[CEP_NOM])
-                        contador+=1
-                    print(f"\nSe han encontrado {contador} coincidencias.")
-                    print(sep)
+                buscar_dato() # Función para buscar coincidencias del valor en los proveedores
             
             elif opcion == 3:
-                consultar_datos()
+                consultar_datos() # Función para consultar los datos del proveedor seleccionado
             
             elif opcion == 4:
                 opcion = None
