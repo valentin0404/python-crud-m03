@@ -84,14 +84,14 @@ def subopcion2_generico(nombre_campo):
 
 #######################################################################################
 # Definimos función para mostrar todos los clientes/empleados/proveedores y para no repetir código ya que se
-# repite en las subopciones 1 y 2 de ambas opciones generales.
+# repite en las subopciones 1 y 2 y 3 de las 3 opciones generales.
 def mostrar_generico():
     if nombre_tabla == "cliente":
-        texto="clientes"
+        texto = "clientes"
     elif nombre_tabla == "empleat":
-        texto="empleados"
+        texto = "empleados"
     elif nombre_tabla == "proveidor":
-        texto="proveedores"
+        texto = "proveedores"
 
     try:
         datos_tabla = dql.consultar_generico(nombre_tabla)
@@ -106,20 +106,76 @@ def mostrar_generico():
             print(sep)
         else:
             print(f"Existen los siguientes {texto}:\n")
+            id_mapeo = {}  # Diccionario para almacenar el mapping enumerate ID -> real ID
+
             if nombre_tabla == "cliente":
-                for dato in datos_tabla:
-                    print(dato[CEP_ID]-10, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+                for index, dato in enumerate(datos_tabla, start=1):
+                    print(index, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+                    id_mapeo[index] = dato[CEP_ID]
             elif nombre_tabla == "empleat":
-                for dato in datos_tabla:
-                    print(dato[CEP_ID], "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+                for index, dato in enumerate(datos_tabla, start=1):
+                    print(index, "-", dato[CEP_NOM], dato[CE_CGM1], dato[CE_CGM2])
+                    id_mapeo[index] = dato[CEP_ID]
             elif nombre_tabla == "proveidor":
-                for dato in datos_tabla:
-                    print(dato[CEP_ID], "-", dato[CEP_NOM])
-            
+                for index, dato in enumerate(datos_tabla, start=1):
+                    print(index, "-", dato[CEP_NOM])
+                    id_mapeo[index] = dato[CEP_ID]
+
             print(sep)
-            if opcion != 1: # En la opción 1 no nos interesa devolver un return
-                return datos_tabla
+            if opcion != 1:  # En la opción 1 no nos interesa devolver un return
+                return datos_tabla, id_mapeo
+
 ### Fin de función mostrar_generico() ###################################################
+
+#######################################################################################
+# Definimos función para consultar el cliente/empleado/proveedor a la elección de lo introducido por el usuario
+# y para no repetir código ya que se repite en la subopcion 3 de las 3 opciones generales.
+def consultar_datos():
+    if nombre_tabla == "cliente":
+        texto = "cliente"
+    elif nombre_tabla == "empleat":
+        texto = "empleado"
+    elif nombre_tabla == "proveidor":
+        texto = "proveedor"
+
+    print(f"\nHas elegido consultar datos sobre un {texto}")
+    datos_tabla, id_mapeo = mostrar_generico()
+    try:
+        id_dato = int(input(f"\nQué {texto} quieres elegir?: "))
+                
+        if id_dato >= 1 and id_dato <= len(datos_tabla):
+            encontrado = False  # Variable para indicar si se encuentra el cliente/empleado/proveedor
+            id_dato=id_mapeo[id_dato]
+            for dato in datos_tabla:
+                if dato[CEP_ID] == id_dato:
+                    encontrado = True
+                    if nombre_tabla != "proveedor": # Condicionales para mostrar dependiendo de que tabla se consulta unos datos u otros.
+                        print(f"{sep}\nHas elegido consultar a {dato[CEP_NOM]} {dato[CE_CGM1]} {dato[CE_CGM2]}.")
+                        if nombre_tabla == "empleat":
+                            print(f"Su teléfono es {dato[C_TLF]}.\n{sep}")
+                        else:
+                            print(f"Su departamento es {dato[E_DPT]}.\n{sep}")
+                    else:
+                        print(f"{sep}\nHas elegido consultar a {dato[CEP_NOM]}.")
+                        print(f"Su CIF es {dato[P_CIF]}.")
+                        print(f"Su dirección es {dato[P_ADR]}.")
+                        print(f"Su correo electrónico es {dato[P_MAIL]}.\n{sep}")
+                    break  # Salir del bucle una vez encontrado el cliente/empleado/proveedor
+
+            if not encontrado:
+                print(f"\nNo se encontró ningún {texto} con el ID proporcionado.")
+        else:
+            if nombre_tabla != "proveedor":
+                print(f"\nEl ID del {texto} no es válido. Debe estar dentro del rango de la lista de {texto}s.")
+            else:
+                print(f"\nEl ID del {texto} no es válido. Debe estar dentro del rango de la lista de {texto}es.")
+
+    except KeyboardInterrupt:
+        print("\nCtrl+C presionado. Saliendo de la opción...")
+                
+    except ValueError:
+        print(f"\nDebes introducir un número entero como ID de {texto}.")
+### Fin de función consultar_datos() ###################################################
 
 #######################################################################################
 # Definimos función para formatear cadenas y que cada palabra empiece por mayúscula
@@ -211,35 +267,8 @@ while opcion != final:
                     print(sep)
                 
             elif opcion == 3:
-                print("\nHas elegido consultar datos sobre un cliente")
-                datos_clientes = mostrar_generico()
-                try:
-                    id_cliente = int(input("\nQué cliente quieres elegir?: "))
-                    
-                    if len(str(id_cliente)) == 0:
-                        raise ValueError("\nEl nombre no puede estar vacío.")
-                    
-                    if id_cliente >= 1 and id_cliente <= len(datos_clientes):
-                        encontrado = False  # Variable para indicar si se encuentra el cliente
-                        id_cliente=id_cliente+10
-                        for cliente in datos_clientes:
-                            if cliente[CEP_ID] == id_cliente:
-                                encontrado = True
-                                print(f"{sep}\nHas elegido consultar a {cliente[CEP_NOM]} {cliente[CE_CGM1]} {cliente[CE_CGM2]}.")
-                                print(f"Su teléfono es {cliente[C_TLF]}.\n{sep}")
-                                break  # Salir del bucle una vez encontrado el cliente
-
-                        if not encontrado:
-                            print("\nNo se encontró ningún cliente con el ID proporcionado.")
-                    else:
-                        print("\nEl ID del cliente no es válido. Debe estar dentro del rango de la lista de clientes.")
-                
-                except KeyboardInterrupt:
-                    print("\nCtrl+C presionado. Saliendo de la opción...")
+                consultar_datos()
                             
-                except ValueError:
-                    print("\nDebes introducir un número entero como ID de cliente.")
-            
             elif opcion == 4:
                 opcion = None
                 print("\nHas elegido añadir un nuevo cliente")
@@ -384,29 +413,7 @@ while opcion != final:
                     print(sep)
 
             elif opcion == 3:
-                print("\nHas elegido consultar datos sobre un empleado")
-                datos_empleados = mostrar_generico()
-                try:
-                    id_empleado = int(input("\nQué empleado quieres elegir?: "))
-
-                    if id_empleado >= 1 and id_empleado <= len(datos_empleados):
-                        encontrado = False  # Variable para indicar si se encuentra el empleado
-                        for empleado in datos_empleados:
-                            if empleado[CEP_ID] == id_empleado:
-                                encontrado = True
-                                print(f"{sep}\nHas elegido consultar a {empleado[CEP_NOM]} {empleado[CE_CGM1]} {empleado[CE_CGM2]}.")
-                                print(f"Su departamento es {empleado[E_DPT]}.\n{sep}")
-                                break  # Salir del bucle una vez encontrado el empleado
-
-                        if not encontrado:
-                            print("\nNo se encontró ningún empleado con el ID proporcionado.")
-                    else:
-                        print("\nEl ID del empleado no es válido. Debe estar dentro del rango de la lista de empleados.")
-                        
-                except ValueError:
-                    print("\nDebes introducir un número entero como ID de empleado.")
-                except KeyboardInterrupt:
-                    print("\nCtrl+C presionado. Saliendo de la opción...")
+                consultar_datos()
             
             elif opcion == 4:
                 opcion = None
@@ -548,31 +555,7 @@ while opcion != final:
                     print(sep)
             
             elif opcion == 3:
-                print("\nHas elegido consultar datos sobre un proveedor")
-                datos_proveedores = mostrar_generico()
-                try:
-                    id_proveedor = int(input("\nQué proveedor quieres elegir?: "))
-
-                    if id_proveedor >= 1 and id_proveedor <= len(datos_proveedores):
-                        encontrado = False  # Variable para indicar si se encuentra el proveedor
-                        for proveedor in datos_proveedores:
-                            if proveedor[CEP_ID] == id_proveedor:
-                                encontrado = True
-                                print(f"{sep}\nHas elegido consultar a {proveedor[CEP_NOM]}.")
-                                print(f"Su CIF es {proveedor[P_CIF]}.")
-                                print(f"Su dirección es {proveedor[P_ADR]}.")
-                                print(f"Su correo electrónico es {proveedor[P_MAIL]}.\n{sep}")
-                                break  # Salir del bucle una vez encontrado el proveedor
-
-                        if not encontrado:
-                            print("\nNo se encontró ningún proveedor con el ID proporcionado.")
-                    else:
-                        print("\nEl ID del proveedor no es válido. Debe estar dentro del rango de la lista de proveedores.")
-                        
-                except ValueError:
-                    print("\nDebes introducir un número entero como ID de proveedor.")
-                except KeyboardInterrupt:
-                        print("\nCtrl+C presionado. Saliendo de la opción...")
+                consultar_datos()
             
             elif opcion == 4:
                 opcion = None
